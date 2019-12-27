@@ -142,27 +142,27 @@ void Motors_Set_GPIO()
 }
 
 void MotorsEnable(char motors)
-	{
-		if(motors & (1 << 0)){MOTOR1_DISABLE;}
-		else {MOTOR1_ENABLE;}
-		if(motors & (1 << 1)){MOTOR2_DISABLE;}
-		else {MOTOR2_ENABLE;}
-		if(motors & (1 << 2)){MOTOR3_ENABLE;}
-		else {MOTOR3_DISABLE;}
-		//delay_us(5);
+{
+    if(motors & (1 << 0)){MOTOR1_DISABLE;}
+    else {MOTOR1_ENABLE;}
+    if(motors & (1 << 1)){MOTOR2_DISABLE;}
+    else {MOTOR2_ENABLE;}
+    if(motors & (1 << 2)){MOTOR3_ENABLE;}
+    else {MOTOR3_DISABLE;}
+    //delay_us(5);
 }
 
 void enable_emergency(void)
 {
-		GPIOE->CRL &= ~0x000F0000;
-		GPIOE->CRL |= 0x00080000; //	input
-		GPIOE->BSRR |= (1 << 4);	//	Pull up
+    GPIOE->CRL &= ~0x000F0000;
+    GPIOE->CRL |= 0x00080000; //	input
+    GPIOE->BSRR |= (1 << 4);	//	Pull up
 }
 
 void st_wake_up() 
 {
   // Enable steppers by resetting the stepper disable port
-	//MotorsEnable(0x07);
+  //MotorsEnable(0x07);
   if (sys.state == STATE_CYCLE) {
     // Initialize stepper output bits
     out_bits = (0) ^ (settings.invert_mask); 
@@ -171,10 +171,10 @@ void st_wake_up()
 //    step_pulse_time = -(((settings.pulse_microseconds-2)*TICKS_PER_MICROSECOND) >> 3);
     // Enable stepper driver interrupt
     NVIC_EnableIRQ (TIM2_IRQn);  
-		NVIC_SetPriority(TIM2_IRQn, 1);
-		enable_emergency();
-		Emergency = 1;	//	KLasicka praca
-		ShowPos = 1;
+    NVIC_SetPriority(TIM2_IRQn, 1);
+    enable_emergency();
+    Emergency = 1;	//	KLasicka praca
+    ShowPos = 1;
   }
 }
 
@@ -197,26 +197,26 @@ void st_wake_up()
 //}
 
 // Stepper shutdown
-void st_go_idle() 
+void st_go_idle()
 {
   // Disable stepper driver interrupt
-//	printpos_grbl(0,480);
-	ShowPos = 0;
-  NVIC_DisableIRQ (TIM2_IRQn); 
-  NVIC_DisableIRQ (EXTI4_IRQn); 
+  //printpos_grbl(0,480);
+  ShowPos = 0;
+  NVIC_DisableIRQ (TIM2_IRQn);
+  NVIC_DisableIRQ (EXTI4_IRQn);
 
-	Emergency = 0;
-//	beep(10);
+  Emergency = 0;
+  //beep(10);
   // Disable steppers only upon system alarm activated or by user setting to not be kept enabled.
   if ((settings.stepper_idle_lock_time != 0xff) || bit_istrue(sys.execute,EXEC_ALARM)) {
     // Force stepper dwell to lock axes for a defined amount of time to ensure the axes come to a complete
     // stop and not drift from residual inertial forces at the end of the last movement.
     delay_ms(settings.stepper_idle_lock_time);
-    if (bit_istrue(settings.flags,BITFLAG_INVERT_ST_ENABLE)) { 
-      STEPPERS_DISABLE_PORT &= ~(1<<STEPPERS_DISABLE_BIT); 
-    } else { 
-      STEPPERS_DISABLE_PORT |= (1<<STEPPERS_DISABLE_BIT); 
-    }   
+    if (bit_istrue(settings.flags,BITFLAG_INVERT_ST_ENABLE)) {
+      STEPPERS_DISABLE_PORT &= ~(1<<STEPPERS_DISABLE_BIT);
+    } else {
+      STEPPERS_DISABLE_PORT |= (1<<STEPPERS_DISABLE_BIT);
+    }
   }
 }
 
@@ -471,10 +471,10 @@ void DoOutPort(char out, char cmd)
 void TIM2_IRQHandler(void)
 {
   if ((TIM2->SR & 0x0001) != 0)                  // check interrupt source
-	{
+  {
     TIM2->SR &= ~(1<<0);                          // clear UIF flag
 
-		TIM2->CNT = 0;
+    TIM2->CNT = 0;
   // Set the direction pins a couple of nanoseconds before we step the steppers
 	DoOutPort(out_bits,0x01);	//	na piny poslem smer
 
@@ -704,7 +704,7 @@ void st_init()
 //  // output mode = 00 (disconnected)
 //  TCCR1A &= ~(3<<COM1A0); 
 //  TCCR1A &= ~(3<<COM1B0); 
-//	
+//
 //  // Configure Timer 2
 //  TCCR2A = 0; // Normal operation
 //  TCCR2B = 0; // Disable timer until needed.
@@ -720,18 +720,16 @@ void st_init()
 //    RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;                     // enable clock for TIM2
 
 //		TIM2->PSC = 0;                            // set prescaler
-//		TIM2->ARR = 1000;												  // set auto-reload
+//		TIM2->ARR = 1000;                         // set auto-reload
 //		TIM2->CR1 = 0;                            // reset command register 1
 //		TIM2->CR2 = 0;                            // reset command register 2
 //		TIM2->DIER = (1<<0);                      // Update interrupt enabled
 //		TIM2->CR1 |= (1<<0);                      // Enable Timer
 
-		DoOutPort(0,0x03);
-		
+    DoOutPort(0,0x03);
 
-		st_wake_up();
-		st_go_idle();
-		
+    st_wake_up();
+    st_go_idle();
 }
 
 // Configures the prescaler and ceiling of timer 1 to produce the given rate as accurately as possible.
@@ -771,9 +769,9 @@ static uint32_t config_step_timer(uint32_t cycles)
 //  TCCR1B = (TCCR1B & ~(0x07<<CS10)) | (prescaler<<CS10);
 //  // Set ceiling
 //  OCR1A = ceiling;
-	
-	TIM2->PSC = prescaler;                      // set prescaler
-	TIM2->ARR = ceiling;											  // set auto-reload
+
+  TIM2->PSC = prescaler;                      // set prescaler
+  TIM2->ARR = ceiling;                        // set auto-reload
   return(actual_cycles);
 }
 

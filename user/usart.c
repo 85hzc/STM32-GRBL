@@ -239,7 +239,7 @@ int fputc(int ch, FILE *f)						  //串口PRINTF函数配置程序
 		USART_SendData(USART2, (unsigned char) ch);
 		while (!(USART2->SR & USART_FLAG_TXE));		 //等待发送完成
 	}
-  else if(USARTx_MARK==3)
+    else if(USARTx_MARK==3)
 	{
 		USART_SendData(USART3, (unsigned char) ch);
 		while (!(USART3->SR & USART_FLAG_TXE));		 //等待发送完成		
@@ -249,7 +249,7 @@ int fputc(int ch, FILE *f)						  //串口PRINTF函数配置程序
 		USART_SendData(UART4, (unsigned char) ch);
 		while (!(UART4->SR & USART_FLAG_TXE));		 //等待发送完成
 	}
-  else if(USARTx_MARK==5)
+    else if(USARTx_MARK==5)
 	{
 		USART_SendData(UART5, (unsigned char) ch);
 		while (!(UART5->SR & USART_FLAG_TXE));		 //等待发送完成		
@@ -261,8 +261,8 @@ int fputc(int ch, FILE *f)						  //串口PRINTF函数配置程序
 
 void Get_RX_4bitData(void)
 {
-			//USART_control=(USART_RX[0]-'0');
-		 	USART_control=(USART_RX[0]-'0')*1000+(USART_RX[1]-'0')*100+(USART_RX[2]-'0')*10+(USART_RX[3]-'0');
- 			USART_mark=0;
+    //USART_control=(USART_RX[0]-'0');
+    USART_control=(USART_RX[0]-'0')*1000+(USART_RX[1]-'0')*100+(USART_RX[2]-'0')*10+(USART_RX[3]-'0');
+    USART_mark=0;
 }
 

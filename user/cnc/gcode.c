@@ -251,34 +251,32 @@ uint8_t gc_execute_line(char *line)
   
   // If there were any errors parsing this line, we will return right away with the bad news
   if (gc.status_code) { return(gc.status_code); }
-  
-  
+
   /* Execute Commands: Perform by order of execution defined in NIST RS274-NGC.v3, Table 8, pg.41.
      NOTE: Independent non-motion/settings parameters are set out of this order for code efficiency 
      and simplicity purposes, but this should not affect proper g-code execution. */
-  
+
   // ([F]: Set feed and seek rates.)
   // TODO: Seek rates can change depending on the direction and maximum speeds of each axes. When
   // max axis speed is installed, the calculation can be performed here, or maybe in the planner.
-    
+
   if (sys.state != STATE_CHECK_MODE) { 
     //  ([M6]: Tool change should be executed here.)
 
-		
     // [M3,M4,M5]: Update spindle state
     spindle_run(gc.spindle_direction);
-  
+
     // [*M7,M8,M9]: Update coolant state
     coolant_run(gc.coolant_mode);
   }
-  
+
   // [G54,G55,...,G59]: Coordinate system selection
   if ( bit_istrue(modal_group_words,bit(MODAL_GROUP_12)) ) { // Check if called in block
     float coord_data[N_AXIS];
     if (!(settings_read_coord_data(gc.coord_select,coord_data))) { return(STATUS_SETTING_READ_FAIL); } 
     memcpy(gc.coord_system,coord_data,sizeof(coord_data));
   }
-  
+
   // [G4,G10,G28,G30,G92,G92.1]: Perform dwell, set coordinate system data, homing, or set axis offsets.
   // NOTE: These commands are in the same modal group, hence are mutually exclusive. G53 is in this
   // modal group and do not effect these actions.

@@ -291,7 +291,6 @@ uint8_t protocol_execute_line(char *line)
         }
     }
     return(STATUS_OK); // If '$' command makes it to here, then everything's ok.
-
   } else {
     return(gc_execute_line(line));    // Everything else is gcode
   }
@@ -305,30 +304,26 @@ void protocol_process()
   uint8_t c;
   while((c = serial_read()) != SERIAL_NO_DATA) {
     //if ((c == '\n') || (c == '\r'))
-		if ((c==0x0a)||(c==0x0d))	
-
-		{ // End of line reached
+    if ((c==0x0a)||(c==0x0d))
+    { // End of line reached
 
       // Runtime command check point before executing line. Prevent any furthur line executions.
       // NOTE: If there is no line, this function should quickly return to the main program when
       // the buffer empties of non-executable data.
       protocol_execute_runtime();
-			
+
       if (sys.abort) { return; } // Bail to main program upon system abort    
 
       if (char_counter > 0) {// Line is complete. Then execute!
         line[char_counter] = 0; // Terminate string
         report_status_message(protocol_execute_line(line));
-				//protocol_execute_line(line);
-				if(mo==1){MotorsEnable(0x07);mo=10;}
-	
+        //protocol_execute_line(line);
+        if(mo==1){MotorsEnable(0x07);mo=10;}
       } else { 
         // Empty or comment line. Skip block.
         report_status_message(STATUS_OK); // Send status message for syncing purposes.
-				
-			}
+      }
       protocol_reset_line_buffer();      
-    
     } else {
       if (iscomment) {
         // Throw away all comment characters

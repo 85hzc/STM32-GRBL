@@ -71,10 +71,10 @@ void serial_init()
 //  // enable rx and tx
 //  UCSR0B |= 1<<RXEN0;
 //  UCSR0B |= 1<<TXEN0;
-//	
+//  
 //  // enable interrupt on complete reception of a byte
 //  UCSR0B |= 1<<RXCIE0;
-//	  
+//    
 //  // defaults to 8-bit, no parity, 1 stop bit
 }
 
@@ -92,9 +92,9 @@ void serial_write(uint8_t data) {
   serial_tx_buffer[serial_tx_buffer_head] = data;
   serial_tx_buffer_head = next_head;
   
-	USART_SendData(USART1, data);
-	while (!(USART1->SR & USART_FLAG_TXE));		 //等待发送完成
-	
+  USART_SendData(USART1, data);
+  while (!(USART1->SR & USART_FLAG_TXE));      //等待发送完成
+    
   // Enable Data Register Empty Interrupt to make sure tx-streaming is running
   //UCSR0B |=  (1 << UDRIE0); 
 }
@@ -116,7 +116,7 @@ ISR(SERIAL_UDRE)
     } else
   #endif
   { 
-    // Send a byte from the buffer	
+    // Send a byte from the buffer  
     UDR0 = serial_tx_buffer[tail];
   
     // Update tail position
@@ -134,38 +134,47 @@ ISR(SERIAL_UDRE)
 
 void USART1_IRQHandler(void)
 {
-	uint8_t data;
-  uint16_t next_head;
+    uint8_t data;
+    uint16_t next_head;
 
-	if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) 
-	{
-		data=USART_ReceiveData(USART1);
-		
-		next_head = serial_rx_buffer_head + 1;
-		
-		if (next_head == RX_BUFFER_SIZE) { next_head = 0; }
-		
-		if (next_head != serial_rx_buffer_tail)
-		{
-			serial_rx_buffer[serial_rx_buffer_head] = data;
-			serial_rx_buffer_head = next_head;    
-		}
+    if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) 
+    {
+        data=USART_ReceiveData(USART1);
+        
+        next_head = serial_rx_buffer_head + 1;
+        
+        if (next_head == RX_BUFFER_SIZE) { next_head = 0; }
+        
+        if (next_head != serial_rx_buffer_tail)
+        {
+            serial_rx_buffer[serial_rx_buffer_head] = data;
+            serial_rx_buffer_head = next_head;    
+        }
 
-		if(data==CMD_RESET){NVIC_SystemReset();}
-		//else if(data==CMD_STATUS_REPORT){sys.execute |= EXEC_STATUS_REPORT;}
-		else if(data==CMD_CYCLE_START){sys.execute |= EXEC_CYCLE_START;}
-		else if(data==CMD_FEED_HOLD){sys.execute |= EXEC_FEED_HOLD;}
-//		switch (data) 
-//		{
-//			case CMD_STATUS_REPORT: sys.execute |= EXEC_STATUS_REPORT; break; // Set as true
-//			case CMD_CYCLE_START:   sys.execute |= EXEC_CYCLE_START; break; // Set as true
-//			case CMD_FEED_HOLD:     sys.execute |= EXEC_FEED_HOLD; break; // Set as true
-//			case CMD_RESET:         NVIC_SystemReset(); break; // Call motion control reset routine.
+        if(data==CMD_RESET)
+        {
+            NVIC_SystemReset();
+        }
+        //else if(data==CMD_STATUS_REPORT){sys.execute |= EXEC_STATUS_REPORT;}
+        else if(data==CMD_CYCLE_START)
+        {
+            sys.execute |= EXEC_CYCLE_START;
+        }
+        else if(data==CMD_FEED_HOLD)
+        {
+            sys.execute |= EXEC_FEED_HOLD;
+        }
+//      switch (data) 
+//      {
+//          case CMD_STATUS_REPORT: sys.execute |= EXEC_STATUS_REPORT; break; // Set as true
+//          case CMD_CYCLE_START:   sys.execute |= EXEC_CYCLE_START; break; // Set as true
+//          case CMD_FEED_HOLD:     sys.execute |= EXEC_FEED_HOLD; break; // Set as true
+//          case CMD_RESET:         NVIC_SystemReset(); break; // Call motion control reset routine.
 
-//		}	
-		//rx_buffer[++rx_buffer_tail] = USART_ReceiveData(USART1);     // Read one byte from the receive data register
-		USART_ClearITPendingBit(USART1, USART_IT_RXNE); 	  		 
-	} 
+//      }
+        //rx_buffer[++rx_buffer_tail] = USART_ReceiveData(USART1);     // Read one byte from the receive data register
+        USART_ClearITPendingBit(USART1, USART_IT_RXNE);              
+    } 
 }
 
 uint8_t serial_read()
